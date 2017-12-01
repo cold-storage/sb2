@@ -1,0 +1,19 @@
+{
+  "name": "sb2",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "John Stein",
+  "license": "Unlicense",
+  "dependencies": {
+    "axios": "0.17.1",
+    "csv-parse": "2.0.0",
+    "csv-stringify": "2.0.0",
+    "json2csv": "3.11.5",
+    "pipedream": "git+ssh://git@github.com/Candoris/pipedream.git",
+    "querystring": "0.2.0"
+  }
+}
