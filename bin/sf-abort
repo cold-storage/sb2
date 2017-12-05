@@ -1,0 +1,46 @@
+#!/usr/bin/env node
+
+'use strict';
+
+const {
+  basename
+} = require('path');
+
+function helpAndExit() {
+  console.error(`
+Usage: ${basename(__filename)} JOB_ID[,JOB_ID,...]
+
+    Aborts a job.
+
+    Comma delimited list of one or more JOB_IDs required.
+`);
+  process.exit(13);
+}
+
+if (process.argv.length < 3) {
+  helpAndExit();
+}
+
+const Bulk2 = require('../lib/bulk2');
+const b2 = new Bulk2();
+
+function jobId() {
+  // 750290000028eF1AAI
+  // 750290000028eNT
+  let result = null;
+  for (let i = 0, l = process.argv.length; i < l; i++) {
+    if (process.argv[i].length == 18 || process.argv[i].length == 15) {
+      result = process.argv[i].substring(0, 15);
+    }
+  }
+  return result;
+}
+
+b2.abortJob(jobId())
+  .then((result) => {
+    console.log(result);
+  })
+  .catch((err) => {
+    console.error(err.stack || err);
+    process.exit(13);
+  });

@@ -1,28 +1,53 @@
-# Name???
+# Pipedream
 
-```sh
-export PATH=./node_modules/pipedream/bin:$PATH
-```
-Usage
+Pipedream attempts to make it as easy as possible to stream CSV data into out of
+Salesforce.
 
-```sh
-sb2 insert Account < some.csv
+We use the new Bulk API 2.0 for insert, update, upsert, and delete.
+https://developer.salesforce.com/blogs/2017/12/slim-new-bulk-api-v2.html
 
-sb2 update Account < some.csv
+Export and PK export aren't available in the new Bulk API 2.0, so for that we
+use the old.
 
-sb2 upsert Account External_Id__c < some.csv
+## Bulk API 2.0
 
-sb2 delete Account < some.csv
+It remains to be seen if Salesforce does a good job at magically getting around
+locks and timeouts. They sure talk it up really big.
 
-sb2 info JOB_ID
+The primary win for us is no more lookups. The 2.0 API lets you use external
+ID fields to link data.
 
-sb2 abort JOB_ID
+https://developer.salesforce.com/docs/atlas.en-us.api_bulk_v2.meta/api_bulk_v2/datafiles_csv_rel_field_header_row.htm
 
-sb2 success JOB_ID > JOB_ID.s.csv
+The max size of a job in the 2.0 API is 100 MB. So while they talk big about
+making things easier and not having to break your data into batches, 100 MB
+isn't that big. So we have to break large files into multiple jobs anyway.
 
-sb2 fail JOB_ID > JOB_ID.f.csv
+I had assumed since they give you a URL to put your CSV data to
+/services/data/vXX.X/jobs/ingest/JOB ID/batches/ that you could do multiple puts
+per job. But that doesn't seem to be the case. Any time I put more than one
+batch of data per job, the close job call fails with a 400 error.
 
-sb2 unprocessed JOB_ID > JOB_ID.u.csv
+The 2.0 API will be awesome if it really solves locking and timeout issues, and
+if it can do multiple puts per job and upload as much data as you need to per
+job.
+
+## Usage
+
+```shell
+sf-export         SF_OBJECT FIELDS WHERE > some.csv
+sf-pkexport       SF_OBJECT FIELDS WHERE > some.csv
+
+sf-insert         SF_OBJECT < some.csv
+sf-update         SF_OBJECT < some.csv
+sf-upsert         SF_OBJECT < some.csv
+sf-delete         SF_OBJECT < some.csv
+sf-failed         JOB_ID [JOB_ID, ...] > JOB_ID_failed.csv
+sf-unprocessed    JOB_ID [JOB_ID, ...] > JOB_ID_unprocessed.csv
+
+sf-info           JOB_ID [JOB_ID, ...]
+sf-abort          JOB_ID [JOB_ID, ...]
+xxx sf-close          JOB_ID [JOB_ID, ...]
 ```
 
 ## API
@@ -143,3 +168,8 @@ curl -X GET \
     "utcOffset": -28800000
 }
 ```
+
+```sh
+export PATH=./node_modules/pipedream/bin:$PATH
+```
+

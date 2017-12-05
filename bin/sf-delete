@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+
+'use strict';
+
+const {
+  basename
+} = require('path');
+
+function helpAndExit() {
+  console.error(`
+Usage: ${basename(__filename)} SF_OBJECT
+
+    Deletes CSV formatted data from Salesforce.
+
+    Reads from STDIN.
+
+    If the data is uploaded successfully we write one
+    or more JOB_IDs to STDOUT.
+
+    Salesforce only allows a max of 100 MB per job.
+    If the file is bigger than that, we split it
+    into multiple jobs and return all the job IDs.
+`);
+  process.exit(13);
+}
+
+if (process.argv.length < 3) {
+  helpAndExit();
+}
+
+const Bulk2 = require('../lib/bulk2');
+const b2 = new Bulk2({
+  object: process.argv[2],
+  operation: 'delete'
+});
+
+require('../lib/bulk2-stream')(b2);
